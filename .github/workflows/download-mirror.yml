@@ -55,6 +55,18 @@ jobs:
           EOF
             fi
           done
+      - name: Copy the verified Music Rhythm Ball game pack
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          sha256=5307eead9d0f7e4395d7495de59bb03f46eed435497169f1b784e7f8489ba378
+          target="site/game-packs/$sha256"
+          mkdir -p "$target"
+          gh release download game-packs-0.5.56.1 --pattern rhythm.zip --dir "$target"
+          test "$(wc -c < "$target/rhythm.zip")" -eq 178738799
+          printf '%s  %s\n' "$sha256" "$target/rhythm.zip" | sha256sum --check
       - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b
         with:
           path: site

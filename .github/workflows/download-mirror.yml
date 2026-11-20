@@ -35,7 +35,7 @@ jobs:
             version="${version%-lite.1}"
             target="site/releases/$version"
             mkdir -p "$target"
-            read -r sha256 size < <(gh release view "$tag" --json assets --jq +              '.assets[] | select(.name == "yougui-lite.apk") | [(.digest | sub("^sha256:"; "")), .size] | @tsv')
+            read -r sha256 size < <(gh release view "$tag" --json assets --jq '.assets[] | select(.name == "yougui-lite.apk") | [(.digest | sub("^sha256:"; "")), .size] | @tsv')
             [[ "$sha256" =~ ^[a-f0-9]{64}$ && "$size" =~ ^[0-9]+$ ]]
             gh release download "$tag" --pattern yougui-lite.apk --dir "$target"
             test "$(wc -c < "$target/yougui-lite.apk")" -eq "$size"

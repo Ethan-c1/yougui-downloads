@@ -9,12 +9,23 @@ on:
     types: [published]
 
 concurrency:
-  group: android-download-mirror
+  group: android-download-mirror-${{ github.event_name == 'release' && github.run_id || 'main' }}
   cancel-in-progress: false
 
 jobs:
+  dispatch:
+    if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'v') && endsWith(github.event.release.tag_name, '-lite.1') && !github.event.release.prerelease
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Run Pages publishing from main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run download-mirror.yml --repo "$GITHUB_REPOSITORY" --ref main
+
   build:
-    if: github.event_name != 'release' || (startsWith(github.event.release.tag_name, 'v') && endsWith(github.event.release.tag_name, '-lite.1') && !github.event.release.prerelease)
+    if: github.event_name != 'release' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
